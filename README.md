@@ -1,6 +1,6 @@
 # AEM EDS Code Generator
 
-A powerful command-line tool for generating boilerplate code for Adobe Experience Manager (AEM) Edge Delivery Services projects. Quickly scaffold blocks, components, templates, and entire project structures.
+A powerful command-line tool for generating boilerplate code for Adobe Experience Manager (AEM) Edge Delivery Services projects. Quickly scaffold blocks, components, templates, and entire project structures, or generate complete site structures from existing websites.
 
 ## Features
 
@@ -20,6 +20,12 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
   - AI-assisted image analysis integration
   - JSON template support for design systems
   - Automatically generates HTML, CSS, and JavaScript from visual designs
+- 🌐 **URL-to-Site Generator** - NEW! Generate complete site structure from any website
+  - Automatic site crawling and analysis
+  - Component identification and generation
+  - Template creation from page layouts
+  - Color scheme and typography extraction
+  - Complete folder structure with documentation
 - 🤖 **MCP Server** - NEW! Model Context Protocol integration for AI coding assistants
   - Works with Claude Desktop, Cursor, and other MCP-compatible tools
   - 10 powerful tools for natural language code generation
@@ -101,7 +107,8 @@ What would you like to generate?
 4. Core Component (from library)
 5. Component from Image/Screenshot 🎨
 6. Initialize new project
-7. Exit
+7. Generate site from URL 🌐
+8. Exit
 ```
 
 ### Generate a Block
@@ -438,6 +445,207 @@ Format as a JSON object matching this structure:
 }
 ```
 
+### Generate Site from URL 🌐
+
+**NEW!** Automatically generate a complete AEM EDS site structure by analyzing any existing website. This powerful feature crawls a website, identifies components, and generates corresponding AEM EDS code.
+
+**How it works:**
+
+```bash
+# Select option 7 from the menu
+=== Generate Site from URL ===
+
+Enter website URL (e.g., https://www.example.com): https://www.starbucksreserve.com
+
+🔍 Starting site analysis...
+
+Validating URL: https://www.starbucksreserve.com
+✓ URL is valid and accessible
+Fetching page content...
+✓ Content fetched successfully
+Analyzing page structure...
+✓ Analysis complete
+
+✓ Site analyzed successfully!
+  Domain: starbucksreserve
+  Title: Starbucks Reserve
+  Components found: 8
+
+Identified components:
+  - navigation: Navigation header (1 instance)
+  - hero: Hero banner section (1 instance)
+  - card: Card component (6 instances)
+  - carousel: Carousel/slider component (2 instances)
+  - footer: Footer section (1 instance)
+
+📦 Generating site structure...
+
+Creating folder structure...
+✓ Folder structure created
+Generating components...
+  ✓ Generated component: navigation
+  ✓ Generated component: hero
+  ✓ Generated component: card
+  ✓ Generated component: carousel
+  ✓ Generated component: footer
+Generating templates...
+  ✓ Generated template: home.html
+Generating styles...
+  ✓ Generated: styles.css
+Generating scripts...
+  ✓ Generated: scripts.js
+Generating documentation...
+  ✓ Generated: README.md
+
+✅ Site generation complete!
+
+📁 Site created at: starbucksreserve/
+
+Generated files:
+  - 5 component(s)
+  - 1 template(s)
+  - Styles and scripts
+  - README.md with documentation
+
+📖 Next steps:
+  1. cd starbucksreserve
+  2. Review the README.md file
+  3. Customize the generated components
+  4. Add your content
+
+💡 Tip: The generated code is a starting point. Review and customize it to match your exact requirements.
+```
+
+#### What Gets Generated
+
+When you provide a URL, the generator creates:
+
+**1. Site Analysis**
+- Crawls the provided URL
+- Identifies common UI patterns and components
+- Extracts color scheme and typography
+- Detects layout patterns (grid, flexbox, responsive design)
+
+**2. Folder Structure**
+```
+sitename/
+├── blocks/          # Component blocks (navigation, hero, card, etc.)
+│   ├── navigation/
+│   │   ├── navigation.js
+│   │   └── navigation.css
+│   ├── hero/
+│   │   ├── hero.js
+│   │   └── hero.css
+│   └── ...
+├── templates/       # Page templates
+│   └── home.html
+├── pages/          # Placeholder for page content
+├── scripts/        # JavaScript with block loader
+│   └── scripts.js
+├── styles/         # Global styles with extracted colors
+│   └── styles.css
+└── README.md       # Complete documentation
+```
+
+**3. Components**
+The generator automatically identifies and creates these types of components:
+- **Navigation** - Header and navigation menus
+- **Hero** - Hero banners and featured sections
+- **Card** - Card-based layouts and grids
+- **Carousel** - Image sliders and carousels
+- **Gallery** - Image galleries and grids
+- **Form** - Contact and other forms
+- **Tabs/Accordion** - Interactive content sections
+- **Footer** - Footer sections
+- **Buttons** - Call-to-action elements
+- **Testimonials** - Review and testimonial sections
+
+**4. Styles**
+- Extracts and applies the site's color scheme
+- Captures typography settings (fonts, sizes, line heights)
+- Includes responsive design patterns
+- Generates CSS custom properties for easy customization
+
+**5. Documentation**
+The generated README.md includes:
+- Overview of the generated structure
+- List of identified and generated components
+- Color scheme and typography details
+- Usage instructions for blocks
+- Next steps and manual adjustments needed
+
+#### Features
+
+✅ **Automatic Component Detection** - Identifies common UI patterns
+✅ **Color Extraction** - Captures the site's color palette
+✅ **Typography Analysis** - Extracts font families and text styles
+✅ **Responsive Patterns** - Detects and implements responsive design
+✅ **Complete Documentation** - Generates comprehensive README
+✅ **Production Ready** - Creates clean, maintainable code
+✅ **Respectful Crawling** - Implements rate limiting and proper user agents
+
+#### Use Cases
+
+1. **Site Migration** - Migrate existing sites to AEM EDS
+2. **Rapid Prototyping** - Quickly scaffold based on reference sites
+3. **Learning** - Study how to structure AEM EDS projects
+4. **Templates** - Create reusable templates from existing designs
+5. **Client Sites** - Generate starting points for client projects
+
+#### Example: Generating from a Real Site
+
+```bash
+node generator.js
+# Select option 7
+# Enter URL: https://www.adobe.com
+# Wait for analysis and generation
+# cd adobe/
+# Review and customize the generated code
+```
+
+#### Web Interface
+
+The web interface also supports URL-based generation:
+
+1. Visit your deployed app
+2. Click "From Website URL" card
+3. Enter the website URL
+4. Click "Generate Site"
+5. Review the analysis results
+6. Download the generated files as a ZIP
+
+#### Important Notes
+
+⚠️ **Generated Code is a Starting Point**
+- The generator creates a foundation based on automated analysis
+- Review and customize all generated code
+- Add actual content and assets from the source site
+- Test and refine components as needed
+
+⚠️ **Manual Adjustments Required**
+- **Images**: Extract and optimize images from the source
+- **Content**: Copy and structure actual text content
+- **Interactions**: Implement specific JavaScript functionality
+- **Forms**: Add proper form handling and validation
+- **Links**: Update navigation and internal links
+- **SEO**: Add meta tags and structured data
+
+⚠️ **Limitations**
+- Currently analyzes only the main page (not deep crawling)
+- Works best with sites that use semantic HTML and CSS classes
+- JavaScript-rendered content may not be fully captured
+- Authentication-protected sites cannot be accessed
+
+#### Best Practices
+
+1. **Start with the Homepage** - URLs should point to main landing pages
+2. **Review Generated Code** - Always review before using in production
+3. **Customize Extensively** - Use generated code as a foundation, not final product
+4. **Test Thoroughly** - Validate all components and functionality
+5. **Respect Copyright** - Only use for legitimate purposes with proper permissions
+6. **Add Assets Manually** - Extract and optimize images separately
+7. **Implement Full Functionality** - Add JavaScript interactions as needed
+
 ### Initialize a New Project
 
 Set up a complete AEM EDS project structure with all necessary directories and base files.
@@ -669,6 +877,7 @@ When deployed as a web app, these RESTful API endpoints are available:
 | `/api/core-components/category/:category` | GET | Get components by category |
 | `/api/generate-core-component` | POST | Generate from core library |
 | `/api/generate-from-image` | POST | Generate component from image |
+| `/api/generate-from-url` | POST | Generate complete site from URL |
 | `/api/init-project` | POST | Initialize project structure |
 
 **Example API Request:**
@@ -683,6 +892,16 @@ curl -X POST https://your-app.vercel.app/api/generate-block \
       "lazyLoad": false,
       "responsive": true
     }
+  }'
+```
+
+**Example: Generate Site from URL**
+
+```bash
+curl -X POST https://your-app.vercel.app/api/generate-from-url \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.example.com"
   }'
 ```
 
@@ -718,6 +937,7 @@ AEM-EDS-Claude-Codegen/
 │   ├── generate-template.js
 │   ├── generate-core-component.js
 │   ├── generate-from-image.js
+│   ├── generate-from-url.js   # NEW: URL-based generation
 │   ├── init-project.js
 │   └── core-components/
 │       ├── categories.js
@@ -725,6 +945,8 @@ AEM-EDS-Claude-Codegen/
 ├── generator.js               # CLI application
 ├── core-components.js         # Component library (30+ components)
 ├── image-analyzer.js          # Image-to-component logic
+├── site-scraper.js            # NEW: URL crawling and analysis
+├── site-generator.js          # NEW: Site structure generation
 ├── examples/                  # Example outputs
 │   ├── hero-block.js
 │   ├── carousel-component.js
@@ -744,6 +966,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - [x] Core Component Library (30+ components based on Adobe AEM Core WCM Components)
 - [x] Image-to-Component generation (transform screenshots/Figma to code)
+- [x] URL-to-Site generation (create complete site structure from any website)
+- [ ] Enhanced crawling with multi-page support (crawl entire site hierarchies)
+- [ ] JavaScript-rendered site support (headless browser integration)
 - [ ] Direct AI vision integration (automatic image analysis without prompts)
 - [ ] Add remaining AEM Core components (List, Download, PDF Viewer, Embed, etc.)
 - [ ] Figma plugin for direct export to code
@@ -759,6 +984,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [ ] Multi-language support in core components
 - [ ] Batch image processing (analyze multiple screenshots at once)
 - [ ] Design token extraction from images
+- [ ] Authentication support for protected sites
+- [ ] Sitemap-based crawling for better site structure
 
 ## License
 
