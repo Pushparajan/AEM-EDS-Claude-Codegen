@@ -757,6 +757,102 @@ async function importAnalysisFromFile() {
   }
 }
 
+// Clone existing website
+async function cloneExistingWebsite() {
+  const { cloneWebsite } = require('./website-cloner');
+
+  console.log('\n=== Website Cloner ===\n');
+  console.log('Analyze and clone an existing website to AEM EDS blocks.\n');
+
+  const url = await question('Enter website URL (e.g., https://www.example.com): ');
+
+  if (!url) {
+    console.log('URL is required');
+    return;
+  }
+
+  // Validate URL
+  try {
+    const urlObj = new URL(url);
+    if (!urlObj.protocol.match(/^https?:$/)) {
+      console.log('Error: URL must use HTTP or HTTPS protocol');
+      return;
+    }
+  } catch (error) {
+    console.log('Error: Invalid URL format');
+    return;
+  }
+
+  const projectName = await question('Project name (default: cloned-website): ') || 'cloned-website';
+  const enableUE = await question('Enable Universal Editor support? (Y/n): ');
+  const universalEditor = !enableUE || enableUE.toLowerCase() !== 'n';
+
+  console.log('\nAnalyzing website...');
+  console.log('This may take a few moments...\n');
+
+  const result = await cloneWebsite(url, { projectName, universalEditor });
+
+  if (!result.success) {
+    console.log(`\n✗ Failed to clone website: ${result.error}\n`);
+    return;
+  }
+
+  const { analysis, project } = result;
+
+  console.log(`✓ Successfully analyzed ${url}\n`);
+  console.log(`Detected ${analysis.components.length} components:\n`);
+
+  analysis.components.forEach(comp => {
+    console.log(`  • ${comp.name} (${comp.block}) - ${comp.confidence} confidence`);
+  });
+
+  console.log(`\n${project.blocks.length} blocks generated`);
+  console.log(`${project.templates.length} templates created`);
+
+  // Create project directory
+  const projectPath = path.join(process.cwd(), projectName);
+
+  if (fs.existsSync(projectPath)) {
+    const overwrite = await question(`\nDirectory "${projectName}" already exists. Overwrite? (y/N): `);
+    if (overwrite.toLowerCase() !== 'y') {
+      console.log('Cancelled');
+      return;
+    }
+  }
+
+  fs.mkdirSync(projectPath, { recursive: true });
+
+  // Create blocks directory
+  const blocksPath = path.join(projectPath, 'blocks');
+  fs.mkdirSync(blocksPath, { recursive: true });
+
+  // Write blocks
+  project.blocks.forEach(block => {
+    const blockPath = path.join(blocksPath, block.name);
+    fs.mkdirSync(blockPath, { recursive: true });
+
+    block.files.forEach(file => {
+      fs.writeFileSync(path.join(blockPath, file.name), file.content);
+    });
+  });
+
+  // Write templates
+  project.templates.forEach(template => {
+    fs.writeFileSync(path.join(projectPath, template.name), template.content);
+  });
+
+  // Write README
+  fs.writeFileSync(path.join(projectPath, 'README.md'), project.readme);
+
+  console.log(`\n✓ Project created successfully at: ${projectPath}\n`);
+  console.log('Next steps:');
+  console.log(`  1. cd ${projectName}`);
+  console.log('  2. Review and customize the generated blocks');
+  console.log('  3. Add actual content from the original site');
+  console.log('  4. Adjust styling to match the design');
+  console.log('  5. Test with AEM Edge Delivery Services\n');
+}
+
 // Main menu
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
@@ -770,9 +866,10 @@ async function main() {
   console.log('4. Core Component (from library)');
   console.log('5. Component from Image/Screenshot 🎨');
   console.log('6. Initialize new project');
-  console.log('7. Exit\n');
+  console.log('7. Clone existing website 🌐');
+  console.log('8. Exit\n');
 
-  const choice = await question('Enter your choice (1-7): ');
+  const choice = await question('Enter your choice (1-8): ');
 
   switch (choice) {
     case '1':
@@ -794,6 +891,9 @@ async function main() {
       await initProject();
       break;
     case '7':
+      await cloneExistingWebsite();
+      break;
+    case '8':
       console.log('Goodbye!');
       rl.close();
       return;

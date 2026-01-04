@@ -25,9 +25,14 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
   - AI-assisted image analysis integration
   - JSON template support for design systems
   - Automatically generates HTML, CSS, and JavaScript from visual designs
-- 🤖 **MCP Server** - NEW! Model Context Protocol integration for AI coding assistants
+- 🌐 **Website Cloner** - NEW! Clone existing websites to AEM EDS
+  - Analyze any website URL and generate equivalent blocks
+  - Automatic component detection (hero, cards, navigation, forms, etc.)
+  - Intelligent pattern matching with confidence scoring
+  - Complete project generation with documentation
+- 🤖 **MCP Server** - Model Context Protocol integration for AI coding assistants
   - Works with Claude Desktop, Cursor, and other MCP-compatible tools
-  - 10 powerful tools for natural language code generation
+  - 11 powerful tools including website cloning
   - AI-assisted development workflow
   - Generate components through conversation
 
@@ -773,6 +778,7 @@ MIT
 
 ### Documentation
 
+- **[Website Cloner Guide](WEBSITE_CLONER.md)** - Clone existing websites to AEM EDS
 - **[Universal Editor Guide](UNIVERSAL_EDITOR.md)** - Complete guide for AEM Universal Editor integration
 - **[MCP Server Documentation](MCP_SERVER.md)** - AI-assisted development with Claude & Cursor
 - **[Environment Variables Guide](ENV_VARS.md)** - Configuration options
