@@ -22,13 +22,52 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 const templates = {
   block: (name, options = {}) => {
     const className = name.toLowerCase().replace(/\s+/g, '-');
-    const jsContent = `export default function decorate(block) {
+
+    // Universal Editor instrumentation helper
+    const universalEditorHelper = options.universalEditor !== false ? `
+/**
+ * Moves Universal Editor instrumentation attributes from source to target element.
+ * This preserves in-context editing capabilities when restructuring the DOM.
+ * @param {Element} source - Original element with data-aue-* attributes
+ * @param {Element} target - New element to receive the attributes
+ */
+function moveInstrumentation(source, target) {
+  if (source === target) return;
+
+  // AEM Universal Editor instrumentation attributes
+  const instrumentationAttrs = [
+    'data-aue-resource',  // URN to the content resource
+    'data-aue-type',      // Type: component, container, text, richtext, reference
+    'data-aue-prop',      // Property name for the field
+    'data-aue-label',     // Custom label for the field
+    'data-aue-filter',    // Component filter (e.g., 'cf' for content fragments)
+    'data-aue-behavior',  // Behavior: 'component' for move/delete capabilities
+  ];
+
+  instrumentationAttrs.forEach((attr) => {
+    const value = source.getAttribute(attr);
+    if (value) {
+      target.setAttribute(attr, value);
+      source.removeAttribute(attr);
+    }
+  });
+}
+` : '';
+
+    const jsContent = `${universalEditorHelper}export default function decorate(block) {
   // TODO: Implement ${name} block decoration logic
   const rows = [...block.children];
 
   rows.forEach((row) => {
     const cells = [...row.children];
-    // Process cells and create block structure
+
+    // Process cells and create block structure${options.universalEditor !== false ? `
+    // IMPORTANT: When restructuring DOM, preserve Universal Editor instrumentation
+    // Example:
+    // const newElement = document.createElement('div');
+    // moveInstrumentation(cells[0], newElement);
+    // row.appendChild(newElement);` : ''}
+
     console.log('Processing row:', row);
   });
 
@@ -174,6 +213,69 @@ ${options.responsive ? `
 </body>
 </html>
 `;
+  },
+
+  /**
+   * Generates a component model definition for AEM Universal Editor.
+   * Component models define the fields shown in the Universal Editor properties panel.
+   * @param {string} blockName - Name of the block
+   * @param {Array} fields - Array of field definitions
+   * @returns {object} Component model definition
+   */
+  componentModel: (blockName, fields = []) => {
+    const blockId = blockName.toLowerCase().replace(/\s+/g, '-');
+
+    // Default fields if none provided
+    const defaultFields = fields.length > 0 ? fields : [
+      {
+        component: 'text',
+        name: 'title',
+        label: 'Title',
+        valueType: 'string'
+      },
+      {
+        component: 'richtext',
+        name: 'description',
+        label: 'Description',
+        valueType: 'string'
+      }
+    ];
+
+    return {
+      id: blockId,
+      fields: defaultFields,
+      filter: {
+        // Filter defines which blocks this model applies to
+        'name': blockId
+      }
+    };
+  },
+
+  /**
+   * Generates a complete component-models.json file for a project.
+   * This file is required for Universal Editor integration.
+   * @param {Array} models - Array of component model objects
+   * @returns {string} JSON string of component models
+   */
+  componentModelsFile: (models = []) => {
+    const defaultModels = models.length > 0 ? models : [
+      {
+        id: 'example',
+        fields: [
+          {
+            component: 'text',
+            name: 'title',
+            label: 'Title',
+            valueType: 'string'
+          }
+        ]
+      }
+    ];
+
+    return JSON.stringify({
+      ':type': 'sheet',
+      'data': defaultModels
+    }, null, 2);
   }
 };
 
@@ -655,6 +757,102 @@ async function importAnalysisFromFile() {
   }
 }
 
+// Clone existing website
+async function cloneExistingWebsite() {
+  const { cloneWebsite } = require('./website-cloner');
+
+  console.log('\n=== Website Cloner ===\n');
+  console.log('Analyze and clone an existing website to AEM EDS blocks.\n');
+
+  const url = await question('Enter website URL (e.g., https://www.example.com): ');
+
+  if (!url) {
+    console.log('URL is required');
+    return;
+  }
+
+  // Validate URL
+  try {
+    const urlObj = new URL(url);
+    if (!urlObj.protocol.match(/^https?:$/)) {
+      console.log('Error: URL must use HTTP or HTTPS protocol');
+      return;
+    }
+  } catch (error) {
+    console.log('Error: Invalid URL format');
+    return;
+  }
+
+  const projectName = await question('Project name (default: cloned-website): ') || 'cloned-website';
+  const enableUE = await question('Enable Universal Editor support? (Y/n): ');
+  const universalEditor = !enableUE || enableUE.toLowerCase() !== 'n';
+
+  console.log('\nAnalyzing website...');
+  console.log('This may take a few moments...\n');
+
+  const result = await cloneWebsite(url, { projectName, universalEditor });
+
+  if (!result.success) {
+    console.log(`\n✗ Failed to clone website: ${result.error}\n`);
+    return;
+  }
+
+  const { analysis, project } = result;
+
+  console.log(`✓ Successfully analyzed ${url}\n`);
+  console.log(`Detected ${analysis.components.length} components:\n`);
+
+  analysis.components.forEach(comp => {
+    console.log(`  • ${comp.name} (${comp.block}) - ${comp.confidence} confidence`);
+  });
+
+  console.log(`\n${project.blocks.length} blocks generated`);
+  console.log(`${project.templates.length} templates created`);
+
+  // Create project directory
+  const projectPath = path.join(process.cwd(), projectName);
+
+  if (fs.existsSync(projectPath)) {
+    const overwrite = await question(`\nDirectory "${projectName}" already exists. Overwrite? (y/N): `);
+    if (overwrite.toLowerCase() !== 'y') {
+      console.log('Cancelled');
+      return;
+    }
+  }
+
+  fs.mkdirSync(projectPath, { recursive: true });
+
+  // Create blocks directory
+  const blocksPath = path.join(projectPath, 'blocks');
+  fs.mkdirSync(blocksPath, { recursive: true });
+
+  // Write blocks
+  project.blocks.forEach(block => {
+    const blockPath = path.join(blocksPath, block.name);
+    fs.mkdirSync(blockPath, { recursive: true });
+
+    block.files.forEach(file => {
+      fs.writeFileSync(path.join(blockPath, file.name), file.content);
+    });
+  });
+
+  // Write templates
+  project.templates.forEach(template => {
+    fs.writeFileSync(path.join(projectPath, template.name), template.content);
+  });
+
+  // Write README
+  fs.writeFileSync(path.join(projectPath, 'README.md'), project.readme);
+
+  console.log(`\n✓ Project created successfully at: ${projectPath}\n`);
+  console.log('Next steps:');
+  console.log(`  1. cd ${projectName}`);
+  console.log('  2. Review and customize the generated blocks');
+  console.log('  3. Add actual content from the original site');
+  console.log('  4. Adjust styling to match the design');
+  console.log('  5. Test with AEM Edge Delivery Services\n');
+}
+
 // Main menu
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
@@ -668,9 +866,10 @@ async function main() {
   console.log('4. Core Component (from library)');
   console.log('5. Component from Image/Screenshot 🎨');
   console.log('6. Initialize new project');
-  console.log('7. Exit\n');
+  console.log('7. Clone existing website 🌐');
+  console.log('8. Exit\n');
 
-  const choice = await question('Enter your choice (1-7): ');
+  const choice = await question('Enter your choice (1-8): ');
 
   switch (choice) {
     case '1':
@@ -692,6 +891,9 @@ async function main() {
       await initProject();
       break;
     case '7':
+      await cloneExistingWebsite();
+      break;
+    case '8':
       console.log('Goodbye!');
       rl.close();
       return;

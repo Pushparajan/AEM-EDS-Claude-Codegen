@@ -1,0 +1,10 @@
+{
+  "mcp": {
+    "servers": {
+      "aem-eds-codegen": {
+        "command": "node",
+        "args": ["/absolute/path/to/AEM-EDS-Claude-Codegen/mcp-server/index.js"]
+      }
+    }
+  }
+}

@@ -21,10 +21,14 @@ build/
 coverage/
 .nyc_output/
 
-# Environment
+# Environment Variables
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+.vercel/.env*
+.netlify/.env*
 
 # Generated projects (for testing)
 test-project/

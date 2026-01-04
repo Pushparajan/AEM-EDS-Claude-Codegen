@@ -10,16 +10,31 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
 - 🏗️ **Project Initializer** - Set up complete AEM EDS project structure
 - ⚡ **Interactive CLI** - User-friendly prompts for configuration
 - 🎨 **Customizable Templates** - Options for buttons, lazy loading, responsive design
+- ✏️ **AEM Universal Editor Support** - Built-in instrumentation for in-context editing
+  - Automatic data-aue-* attribute handling
+  - moveInstrumentation() helper included in all blocks
+  - Component model generation support
+  - Preserves editing capabilities during DOM manipulation
 - 📦 **Core Component Library** - 30+ pre-built components based on Adobe AEM Core WCM Components
   - Template Components (Page, Navigation, Breadcrumb, Search)
   - Content Components (Title, Text, Image, Button, Teaser)
   - Container Components (Carousel, Tabs, Accordion)
   - Form Components (Form with validation)
-- 🎨 **Image-to-Component** - NEW! Generate components from UI screenshots/Figma designs
+- 🎨 **Image-to-Component** - Generate components from UI screenshots/Figma designs
   - Interactive guided analysis
   - AI-assisted image analysis integration
   - JSON template support for design systems
   - Automatically generates HTML, CSS, and JavaScript from visual designs
+- 🌐 **Website Cloner** - NEW! Clone existing websites to AEM EDS
+  - Analyze any website URL and generate equivalent blocks
+  - Automatic component detection (hero, cards, navigation, forms, etc.)
+  - Intelligent pattern matching with confidence scoring
+  - Complete project generation with documentation
+- 🤖 **MCP Server** - Model Context Protocol integration for AI coding assistants
+  - Works with Claude Desktop, Cursor, and other MCP-compatible tools
+  - 11 powerful tools including website cloning
+  - AI-assisted development workflow
+  - Generate components through conversation
 
 ## Installation
 
@@ -761,8 +776,19 @@ MIT
 
 ## Resources
 
+### Documentation
+
+- **[Website Cloner Guide](WEBSITE_CLONER.md)** - Clone existing websites to AEM EDS
+- **[Universal Editor Guide](UNIVERSAL_EDITOR.md)** - Complete guide for AEM Universal Editor integration
+- **[MCP Server Documentation](MCP_SERVER.md)** - AI-assisted development with Claude & Cursor
+- **[Environment Variables Guide](ENV_VARS.md)** - Configuration options
+- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to Vercel or Netlify
+
+### External Resources
+
 - [AEM Edge Delivery Services Documentation](https://www.aem.live/developer/tutorial)
 - [Block Development Guide](https://www.aem.live/developer/block-collection)
+- [Universal Editor - Creating Instrumented Blocks](https://www.aem.live/developer/universal-editor-blocks)
 - [AEM EDS GitHub](https://github.com/adobe/aem-boilerplate)
 
 ## Support
