@@ -15,11 +15,16 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
   - Content Components (Title, Text, Image, Button, Teaser)
   - Container Components (Carousel, Tabs, Accordion)
   - Form Components (Form with validation)
-- 🎨 **Image-to-Component** - NEW! Generate components from UI screenshots/Figma designs
+- 🎨 **Image-to-Component** - Generate components from UI screenshots/Figma designs
   - Interactive guided analysis
   - AI-assisted image analysis integration
   - JSON template support for design systems
   - Automatically generates HTML, CSS, and JavaScript from visual designs
+- 🤖 **MCP Server** - NEW! Model Context Protocol integration for AI coding assistants
+  - Works with Claude Desktop, Cursor, and other MCP-compatible tools
+  - 10 powerful tools for natural language code generation
+  - AI-assisted development workflow
+  - Generate components through conversation
 
 ## Installation
 
