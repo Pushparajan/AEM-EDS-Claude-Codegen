@@ -18,6 +18,7 @@ const {
 const { templates } = require('../generator');
 const { coreComponents, componentCategories } = require('../core-components');
 const { generateFromImageWithAI } = require('../image-analyzer');
+const { cloneWebsite } = require('../website-cloner');
 
 // Initialize MCP server
 const server = new Server(
@@ -38,7 +39,7 @@ const server = new Server(
 const TOOLS = [
   {
     name: 'generate_block',
-    description: 'Generate a custom AEM Edge Delivery Services block with JavaScript and CSS. Blocks are the core building units of AEM EDS pages.',
+    description: 'Generate a custom AEM Edge Delivery Services block with JavaScript and CSS. Blocks are the core building units of AEM EDS pages. Supports AEM Universal Editor by default for in-context editing.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -59,6 +60,11 @@ const TOOLS = [
         responsive: {
           type: 'boolean',
           description: 'Add responsive design with media queries',
+          default: true,
+        },
+        universalEditor: {
+          type: 'boolean',
+          description: 'Include AEM Universal Editor instrumentation support (data-aue-* attributes handling)',
           default: true,
         },
       },
@@ -248,6 +254,29 @@ const TOOLS = [
       required: ['keyword'],
     },
   },
+  {
+    name: 'clone_website',
+    description: 'Analyze and clone an existing website to AEM Edge Delivery Services. Automatically detects components like hero sections, navigation, cards, carousels, forms, etc., and generates equivalent AEM EDS blocks and project structure.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: {
+          type: 'string',
+          description: 'Full URL of the website to clone (e.g., "https://www.example.com")',
+        },
+        projectName: {
+          type: 'string',
+          description: 'Name for the generated project (optional, defaults to "cloned-website")',
+        },
+        universalEditor: {
+          type: 'boolean',
+          description: 'Include Universal Editor support in generated blocks (default: true)',
+          default: true,
+        },
+      },
+      required: ['url'],
+    },
+  },
 ];
 
 /**
@@ -294,6 +323,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'search_components':
         return handleSearchComponents(args);
 
+      case 'clone_website':
+        return await handleCloneWebsite(args);
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -315,14 +347,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
  */
 
 function handleGenerateBlock(args) {
-  const { name, hasButtons = false, lazyLoad = false, responsive = true } = args;
-  const { js, css, className } = templates.block(name, { hasButtons, lazyLoad, responsive });
+  const { name, hasButtons = false, lazyLoad = false, responsive = true, universalEditor = true } = args;
+  const { js, css, className } = templates.block(name, { hasButtons, lazyLoad, responsive, universalEditor });
+
+  const message = universalEditor
+    ? `Generated block "${name}" (${className}) with AEM Universal Editor support\n\nFiles created:\n- ${className}.js (includes moveInstrumentation helper)\n- ${className}.css\n\nNote: Block includes data-aue-* attribute handling for in-context editing.`
+    : `Generated block "${name}" (${className})\n\nFiles created:\n- ${className}.js\n- ${className}.css`;
 
   return {
     content: [
       {
         type: 'text',
-        text: `Generated block "${name}" (${className})\n\nFiles created:\n- ${className}.js\n- ${className}.css`,
+        text: message,
       },
       {
         type: 'resource',
@@ -647,6 +683,90 @@ function handleSearchComponents(args) {
       },
     ],
   };
+}
+
+async function handleCloneWebsite(args) {
+  const { url, projectName, universalEditor = true } = args;
+
+  const result = await cloneWebsite(url, { projectName, universalEditor });
+
+  if (!result.success) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Failed to clone website: ${result.error}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  const { analysis, project } = result;
+
+  // Format component list
+  const componentList = analysis.components
+    .map(c => `- ${c.name} (${c.block}) - ${c.confidence} confidence`)
+    .join('\n');
+
+  // Generate summary
+  let summary = `Successfully cloned ${url}\n\n`;
+  summary += `**Detected Components (${analysis.components.length}):**\n${componentList}\n\n`;
+  summary += `**Project Structure:**\n`;
+  summary += `- ${project.blocks.length} blocks generated\n`;
+  summary += `- ${project.templates.length} templates created\n`;
+  summary += `- Universal Editor: ${universalEditor ? 'Enabled' : 'Disabled'}\n\n`;
+  summary += `**Metadata:**\n`;
+  summary += `- Title: ${analysis.metadata.title || 'N/A'}\n`;
+  summary += `- Description: ${analysis.metadata.description || 'N/A'}\n`;
+
+  // Build response with all generated files
+  const content = [
+    {
+      type: 'text',
+      text: summary,
+    },
+  ];
+
+  // Add README
+  content.push({
+    type: 'resource',
+    resource: {
+      uri: `file://${project.projectName}/README.md`,
+      mimeType: 'text/markdown',
+      text: project.readme,
+    },
+  });
+
+  // Add all block files
+  project.blocks.forEach(block => {
+    block.files.forEach(file => {
+      const mimeType = file.name.endsWith('.js') ? 'text/javascript' :
+                       file.name.endsWith('.css') ? 'text/css' : 'text/plain';
+      content.push({
+        type: 'resource',
+        resource: {
+          uri: `file://${project.projectName}/blocks/${block.name}/${file.name}`,
+          mimeType,
+          text: file.content,
+        },
+      });
+    });
+  });
+
+  // Add templates
+  project.templates.forEach(template => {
+    content.push({
+      type: 'resource',
+      resource: {
+        uri: `file://${project.projectName}/${template.name}`,
+        mimeType: 'text/html',
+        text: template.content,
+      },
+    });
+  });
+
+  return { content };
 }
 
 /**
