@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { coreComponents, componentCategories } = require('./core-components');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -378,6 +379,64 @@ main {
   console.log('  Structure created with directories: ' + dirs.join(', '));
 }
 
+async function generateCoreComponent() {
+  console.log('\n=== Core Component Library ===\n');
+  console.log('Available component categories:\n');
+
+  const categories = Object.keys(componentCategories);
+  categories.forEach((cat, index) => {
+    console.log(`${index + 1}. ${cat.charAt(0).toUpperCase() + cat.slice(1)} Components`);
+  });
+
+  console.log('');
+  const categoryChoice = await question(`Select category (1-${categories.length}): `);
+  const categoryIndex = parseInt(categoryChoice) - 1;
+
+  if (categoryIndex < 0 || categoryIndex >= categories.length) {
+    console.log('Invalid category selection');
+    return;
+  }
+
+  const selectedCategory = categories[categoryIndex];
+  const components = componentCategories[selectedCategory];
+
+  console.log(`\n${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Components:\n`);
+
+  components.forEach((comp, index) => {
+    const component = coreComponents[comp];
+    console.log(`${index + 1}. ${comp.charAt(0).toUpperCase() + comp.slice(1)} - ${component.description}`);
+  });
+
+  console.log('');
+  const componentChoice = await question(`Select component (1-${components.length}): `);
+  const componentIndex = parseInt(componentChoice) - 1;
+
+  if (componentIndex < 0 || componentIndex >= components.length) {
+    console.log('Invalid component selection');
+    return;
+  }
+
+  const selectedComponentName = components[componentIndex];
+  const selectedComponent = coreComponents[selectedComponentName];
+  const className = selectedComponentName.toLowerCase().replace(/\s+/g, '-');
+
+  // Generate the component
+  const blocksDir = path.join(process.cwd(), 'blocks', className);
+
+  if (!fs.existsSync(blocksDir)) {
+    fs.mkdirSync(blocksDir, { recursive: true });
+  }
+
+  fs.writeFileSync(path.join(blocksDir, `${className}.js`), selectedComponent.js);
+  fs.writeFileSync(path.join(blocksDir, `${className}.css`), selectedComponent.css);
+
+  console.log(`\n✓ Core component "${selectedComponentName}" created successfully!`);
+  console.log(`  Category: ${selectedCategory}`);
+  console.log(`  Location: blocks/${className}/`);
+  console.log(`  Files: ${className}.js, ${className}.css`);
+  console.log(`  Description: ${selectedComponent.description}`);
+}
+
 // Main menu
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
@@ -385,13 +444,14 @@ async function main() {
   console.log('╚════════════════════════════════════════════╝\n');
 
   console.log('What would you like to generate?\n');
-  console.log('1. Block');
-  console.log('2. Component');
+  console.log('1. Custom Block');
+  console.log('2. Custom Component');
   console.log('3. Template');
-  console.log('4. Initialize new project');
-  console.log('5. Exit\n');
+  console.log('4. Core Component (from library)');
+  console.log('5. Initialize new project');
+  console.log('6. Exit\n');
 
-  const choice = await question('Enter your choice (1-5): ');
+  const choice = await question('Enter your choice (1-6): ');
 
   switch (choice) {
     case '1':
@@ -404,9 +464,12 @@ async function main() {
       await generateTemplate();
       break;
     case '4':
-      await initProject();
+      await generateCoreComponent();
       break;
     case '5':
+      await initProject();
+      break;
+    case '6':
       console.log('Goodbye!');
       rl.close();
       return;
@@ -430,4 +493,4 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-module.exports = { templates, generateBlock, generateComponent, generateTemplate, initProject };
+module.exports = { templates, generateBlock, generateComponent, generateTemplate, initProject, generateCoreComponent, coreComponents };
