@@ -29,15 +29,14 @@
   "author": "",
   "license": "MIT",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Pushparajan/AEM-EDS-Claude-Codegen.git"
   },
   "dependencies": {
-    "multiparty": "^4.2.3",
-    "@modelcontextprotocol/sdk": "^0.5.0"
+    "multiparty": "^4.2.3"
   },
   "devDependencies": {
     "vercel": "^33.0.0",

@@ -10,6 +10,11 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
 - 🏗️ **Project Initializer** - Set up complete AEM EDS project structure
 - ⚡ **Interactive CLI** - User-friendly prompts for configuration
 - 🎨 **Customizable Templates** - Options for buttons, lazy loading, responsive design
+- ✏️ **AEM Universal Editor Support** - Built-in instrumentation for in-context editing
+  - Automatic data-aue-* attribute handling
+  - moveInstrumentation() helper included in all blocks
+  - Component model generation support
+  - Preserves editing capabilities during DOM manipulation
 - 📦 **Core Component Library** - 30+ pre-built components based on Adobe AEM Core WCM Components
   - Template Components (Page, Navigation, Breadcrumb, Search)
   - Content Components (Title, Text, Image, Button, Teaser)
@@ -20,9 +25,14 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
   - AI-assisted image analysis integration
   - JSON template support for design systems
   - Automatically generates HTML, CSS, and JavaScript from visual designs
-- 🤖 **MCP Server** - NEW! Model Context Protocol integration for AI coding assistants
+- 🌐 **Website Cloner** - NEW! Clone existing websites to AEM EDS
+  - Analyze any website URL and generate equivalent blocks
+  - Automatic component detection (hero, cards, navigation, forms, etc.)
+  - Intelligent pattern matching with confidence scoring
+  - Complete project generation with documentation
+- 🤖 **MCP Server** - Model Context Protocol integration for AI coding assistants
   - Works with Claude Desktop, Cursor, and other MCP-compatible tools
-  - 10 powerful tools for natural language code generation
+  - 11 powerful tools including website cloning
   - AI-assisted development workflow
   - Generate components through conversation
 
@@ -64,11 +74,16 @@ Access the web interface at your deployed URL or run locally:
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Start development server (Netlify)
+netlify dev
+# Access at http://localhost:8888
 
+# Or using Vercel
+npm run dev
 # Access at http://localhost:3000
 ```
+
+📖 **For detailed local development setup**, see **[LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md)**
 
 **Web App Features:**
 - 🎨 Beautiful, responsive UI
@@ -101,7 +116,8 @@ What would you like to generate?
 4. Core Component (from library)
 5. Component from Image/Screenshot 🎨
 6. Initialize new project
-7. Exit
+7. Clone existing website 🌐
+8. Exit
 ```
 
 ### Generate a Block
@@ -766,8 +782,21 @@ MIT
 
 ## Resources
 
+### Documentation
+
+- **[Local Development Guide](LOCAL_DEVELOPMENT.md)** - Run locally with Netlify CLI
+- **[Website Cloner Guide](WEBSITE_CLONER.md)** - Clone existing websites to AEM EDS
+- **[Universal Editor Guide](UNIVERSAL_EDITOR.md)** - Complete guide for AEM Universal Editor integration
+- **[MCP Server Documentation](MCP_SERVER.md)** - AI-assisted development with Claude & Cursor
+- **[Environment Variables Guide](ENV_VARS.md)** - Configuration options
+- **[Deployment Guide](DEPLOYMENT.md)** - Deploy to Vercel or Netlify
+- **[Quick Start Guide](QUICK_START.md)** - Get started quickly
+
+### External Resources
+
 - [AEM Edge Delivery Services Documentation](https://www.aem.live/developer/tutorial)
 - [Block Development Guide](https://www.aem.live/developer/block-collection)
+- [Universal Editor - Creating Instrumented Blocks](https://www.aem.live/developer/universal-editor-blocks)
 - [AEM EDS GitHub](https://github.com/adobe/aem-boilerplate)
 
 ## Support
