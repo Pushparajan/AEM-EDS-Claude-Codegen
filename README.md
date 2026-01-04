@@ -23,12 +23,24 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
 
 ## Installation
 
+### Web Application (Recommended)
+
+🌐 **Try it online**: Deploy your own instance with one click!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Pushparajan/AEM-EDS-Claude-Codegen)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Pushparajan/AEM-EDS-Claude-Codegen)
+
+### CLI Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/AEM-EDS-Claude-Codegen.git
 
 # Navigate to the directory
 cd AEM-EDS-Claude-Codegen
+
+# Install dependencies
+npm install
 
 # Make the generator executable
 chmod +x generator.js
@@ -39,9 +51,31 @@ npm link
 
 ## Usage
 
-### Interactive Mode
+### Web Application
 
-Run the generator in interactive mode:
+Access the web interface at your deployed URL or run locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Access at http://localhost:3000
+```
+
+**Web App Features:**
+- 🎨 Beautiful, responsive UI
+- 📱 Works on desktop and mobile
+- 💾 Download generated files instantly
+- 🖼️ Upload images for component generation
+- ⚡ Real-time code generation
+- 🚀 No installation required
+
+### CLI Mode
+
+Run the generator in interactive CLI mode:
 
 ```bash
 node generator.js
@@ -585,6 +619,116 @@ Generated with responsive support:
     flex-direction: column;
   }
 }
+```
+
+## Deployment
+
+### Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel
+
+# Or use the deploy script
+npm run deploy:vercel
+```
+
+### Deploy to Netlify
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Deploy
+netlify deploy --prod
+
+# Or use the deploy script
+npm run deploy:netlify
+```
+
+📖 See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions, troubleshooting, and configuration details.
+
+## API Endpoints
+
+When deployed as a web app, these RESTful API endpoints are available:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/generate-block` | POST | Generate custom AEM EDS blocks |
+| `/api/generate-component` | POST | Generate custom components |
+| `/api/generate-template` | POST | Generate HTML templates |
+| `/api/core-components/categories` | GET | List all component categories |
+| `/api/core-components/category/:category` | GET | Get components by category |
+| `/api/generate-core-component` | POST | Generate from core library |
+| `/api/generate-from-image` | POST | Generate component from image |
+| `/api/init-project` | POST | Initialize project structure |
+
+**Example API Request:**
+
+```bash
+curl -X POST https://your-app.vercel.app/api/generate-block \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "hero",
+    "options": {
+      "hasButtons": true,
+      "lazyLoad": false,
+      "responsive": true
+    }
+  }'
+```
+
+## Development
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start CLI mode
+npm start
+
+# Start web server (Vercel dev)
+npm run dev
+
+# Build
+npm run build
+```
+
+### Project Structure
+
+```
+AEM-EDS-Claude-Codegen/
+├── public/                     # Web application
+│   ├── index.html             # Main UI
+│   ├── styles.css             # Styling
+│   └── app.js                 # Frontend logic
+├── api/                       # Serverless functions
+│   ├── generate-block.js
+│   ├── generate-component.js
+│   ├── generate-template.js
+│   ├── generate-core-component.js
+│   ├── generate-from-image.js
+│   ├── init-project.js
+│   └── core-components/
+│       ├── categories.js
+│       └── category/[category].js
+├── generator.js               # CLI application
+├── core-components.js         # Component library (30+ components)
+├── image-analyzer.js          # Image-to-component logic
+├── examples/                  # Example outputs
+│   ├── hero-block.js
+│   ├── carousel-component.js
+│   └── analysis-template.json
+├── vercel.json               # Vercel configuration
+├── netlify.toml              # Netlify configuration
+├── package.json              # Dependencies & scripts
+├── README.md                 # This file
+└── DEPLOYMENT.md             # Deployment guide
 ```
 
 ## Contributing

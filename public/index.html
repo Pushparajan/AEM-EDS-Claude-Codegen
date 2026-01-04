@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Generate AEM Edge Delivery Services components from templates, core library, or images">
+  <title>AEM EDS Code Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>🚀 AEM EDS Code Generator</h1>
+      <p class="subtitle">Generate production-ready components for Adobe Experience Manager Edge Delivery Services</p>
+    </header>
+
+    <main class="main">
+      <!-- Generator Selection -->
+      <section class="generator-select" id="generatorSelect">
+        <h2>What would you like to generate?</h2>
+        <div class="card-grid">
+          <div class="card" data-generator="custom-block">
+            <div class="card-icon">📦</div>
+            <h3>Custom Block</h3>
+            <p>Create AEM EDS blocks with JavaScript and CSS</p>
+          </div>
+
+          <div class="card" data-generator="custom-component">
+            <div class="card-icon">🧩</div>
+            <h3>Custom Component</h3>
+            <p>Generate reusable components (functional or class-based)</p>
+          </div>
+
+          <div class="card" data-generator="template">
+            <div class="card-icon">📄</div>
+            <h3>Template</h3>
+            <p>Scaffold HTML page templates</p>
+          </div>
+
+          <div class="card" data-generator="core-component">
+            <div class="card-icon">⭐</div>
+            <h3>Core Component</h3>
+            <p>30+ pre-built components from library</p>
+          </div>
+
+          <div class="card featured" data-generator="image-component">
+            <div class="card-icon">🎨</div>
+            <h3>From Image/Screenshot</h3>
+            <p>Transform UI designs into code</p>
+            <span class="badge">New!</span>
+          </div>
+
+          <div class="card" data-generator="project-init">
+            <div class="card-icon">🏗️</div>
+            <h3>Initialize Project</h3>
+            <p>Set up complete project structure</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Custom Block Generator -->
+      <section class="generator-form hidden" id="customBlockForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Custom Block Generator</h2>
+        <form id="blockForm">
+          <div class="form-group">
+            <label for="blockName">Block Name *</label>
+            <input type="text" id="blockName" placeholder="e.g., hero, carousel" required>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="blockButtons">
+              Include button support
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="blockLazyLoad">
+              Enable lazy loading
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="blockResponsive" checked>
+              Add responsive styles
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Generate Block</button>
+        </form>
+      </section>
+
+      <!-- Custom Component Generator -->
+      <section class="generator-form hidden" id="customComponentForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Custom Component Generator</h2>
+        <form id="componentForm">
+          <div class="form-group">
+            <label for="componentName">Component Name *</label>
+            <input type="text" id="componentName" placeholder="e.g., Carousel, Modal" required>
+          </div>
+
+          <div class="form-group">
+            <label for="componentType">Component Type</label>
+            <select id="componentType">
+              <option value="functional">Functional</option>
+              <option value="class">Class-based</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Generate Component</button>
+        </form>
+      </section>
+
+      <!-- Template Generator -->
+      <section class="generator-form hidden" id="templateForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Template Generator</h2>
+        <form id="htmlTemplateForm">
+          <div class="form-group">
+            <label for="templateName">Template Name *</label>
+            <input type="text" id="templateName" placeholder="e.g., Landing Page" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Generate Template</button>
+        </form>
+      </section>
+
+      <!-- Core Component Generator -->
+      <section class="generator-form hidden" id="coreComponentForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Core Component Library</h2>
+
+        <div class="form-group">
+          <label>Select Category</label>
+          <div class="button-group" id="categoryButtons"></div>
+        </div>
+
+        <div class="form-group hidden" id="componentListGroup">
+          <label>Select Component</label>
+          <div class="component-list" id="componentList"></div>
+        </div>
+
+        <button type="button" class="btn btn-primary hidden" id="generateCoreBtn">Generate Component</button>
+      </section>
+
+      <!-- Image Component Generator -->
+      <section class="generator-form hidden" id="imageComponentForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Generate from Image/Screenshot</h2>
+
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📸</div>
+          <p>Drop your UI screenshot here or click to browse</p>
+          <input type="file" id="imageInput" accept="image/*" hidden>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('imageInput').click()">
+            Browse Files
+          </button>
+        </div>
+
+        <div class="image-preview hidden" id="imagePreview">
+          <img id="previewImg" alt="Preview">
+          <button type="button" class="btn-close" onclick="clearImage()">×</button>
+        </div>
+
+        <form id="imageAnalysisForm" class="hidden">
+          <div class="form-group">
+            <label for="imageComponentName">Component Name *</label>
+            <input type="text" id="imageComponentName" placeholder="e.g., product-card" required>
+          </div>
+
+          <div class="form-group">
+            <label>Analysis Mode</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="analysisMode" value="interactive" checked>
+                Interactive Description (Recommended)
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="analysisMode" value="auto">
+                Auto-generate Template
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="analysisMode" value="json">
+                Import from JSON
+              </label>
+            </div>
+          </div>
+
+          <div id="interactiveFields" class="analysis-fields">
+            <h3>Describe the UI</h3>
+
+            <div class="form-group">
+              <label for="layoutType">Layout Type</label>
+              <select id="layoutType">
+                <option value="flex">Flexbox</option>
+                <option value="grid">Grid</option>
+                <option value="block">Block</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="primaryColor">Primary Color</label>
+              <input type="color" id="primaryColor" value="#0066cc">
+              <input type="text" id="primaryColorText" value="#0066cc" placeholder="#0066cc">
+            </div>
+
+            <div class="form-group">
+              <label for="bgColor">Background Color</label>
+              <input type="color" id="bgColor" value="#ffffff">
+              <input type="text" id="bgColorText" value="#ffffff" placeholder="#ffffff">
+            </div>
+
+            <div class="form-group">
+              <label for="textColor">Text Color</label>
+              <input type="color" id="textColor" value="#333333">
+              <input type="text" id="textColorText" value="#333333" placeholder="#333333">
+            </div>
+
+            <div class="form-group">
+              <label for="fontFamily">Font Family</label>
+              <input type="text" id="fontFamily" value="system-ui, sans-serif" placeholder="system-ui, sans-serif">
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hasHover">
+                Has hover effects
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hasClick">
+                Has click interactions
+              </label>
+            </div>
+          </div>
+
+          <div id="jsonFields" class="analysis-fields hidden">
+            <div class="form-group">
+              <label for="jsonInput">Paste Analysis JSON</label>
+              <textarea id="jsonInput" rows="10" placeholder='{"layout": {...}, "colors": {...}}'></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Generate from Image</button>
+        </form>
+      </section>
+
+      <!-- Project Init -->
+      <section class="generator-form hidden" id="projectInitForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Initialize New Project</h2>
+        <form id="initForm">
+          <div class="form-group">
+            <label for="projectName">Project Name *</label>
+            <input type="text" id="projectName" placeholder="e.g., my-aem-project" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Initialize Project</button>
+        </form>
+      </section>
+
+      <!-- Result Display -->
+      <section class="result hidden" id="result">
+        <h2>✓ Generated Successfully!</h2>
+        <div id="resultContent"></div>
+        <div class="result-actions">
+          <button class="btn btn-primary" id="downloadBtn">Download Files</button>
+          <button class="btn btn-secondary" onclick="showGeneratorSelect()">Generate Another</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>AEM EDS Code Generator | <a href="https://github.com/Pushparajan/AEM-EDS-Claude-Codegen" target="_blank">GitHub</a></p>
+    </footer>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Generating your component...</p>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -9,6 +9,10 @@
   },
   "scripts": {
     "start": "node generator.js",
+    "dev": "vercel dev",
+    "build": "echo 'Build complete'",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -19,7 +23,8 @@
     "code-generator",
     "scaffold",
     "cli",
-    "adobe"
+    "adobe",
+    "web-app"
   ],
   "author": "",
   "license": "MIT",
@@ -29,5 +34,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Pushparajan/AEM-EDS-Claude-Codegen.git"
+  },
+  "dependencies": {
+    "multiparty": "^4.2.3"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0",
+    "netlify-cli": "^17.0.0"
   }
 }
