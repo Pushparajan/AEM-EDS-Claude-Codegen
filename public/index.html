@@ -50,6 +50,13 @@
             <span class="badge">New!</span>
           </div>
 
+          <div class="card featured" data-generator="url-site">
+            <div class="card-icon">🌐</div>
+            <h3>From Website URL</h3>
+            <p>Generate complete site structure from any URL</p>
+            <span class="badge">New!</span>
+          </div>
+
           <div class="card" data-generator="project-init">
             <div class="card-icon">🏗️</div>
             <h3>Initialize Project</h3>
@@ -262,6 +269,36 @@
           </div>
 
           <button type="submit" class="btn btn-primary">Initialize Project</button>
+        </form>
+      </section>
+
+      <!-- URL Site Generator -->
+      <section class="generator-form hidden" id="urlSiteForm">
+        <button class="back-btn" onclick="showGeneratorSelect()">← Back</button>
+        <h2>Generate Site from URL</h2>
+        <p class="form-description">
+          Enter a website URL to automatically analyze and generate an AEM EDS site structure with components, templates, and pages.
+        </p>
+        
+        <form id="urlForm">
+          <div class="form-group">
+            <label for="siteUrl">Website URL *</label>
+            <input type="url" id="siteUrl" placeholder="https://www.example.com" required>
+            <small>The site will be analyzed and components will be generated automatically</small>
+          </div>
+
+          <div class="info-box">
+            <h4>ℹ️ What will be generated:</h4>
+            <ul>
+              <li>Folder structure (components, templates, pages)</li>
+              <li>Identified UI components as AEM blocks</li>
+              <li>Page templates with detected layout</li>
+              <li>Styles matching the site's color scheme</li>
+              <li>README with documentation and next steps</li>
+            </ul>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Generate Site</button>
         </form>
       </section>
 
