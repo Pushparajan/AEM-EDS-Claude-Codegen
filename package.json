@@ -1,0 +1,33 @@
+{
+  "name": "aem-eds-codegen",
+  "version": "1.0.0",
+  "description": "Code generator for Adobe Experience Manager Edge Delivery Services projects",
+  "main": "generator.js",
+  "type": "commonjs",
+  "bin": {
+    "aem-gen": "./generator.js"
+  },
+  "scripts": {
+    "start": "node generator.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aem",
+    "edge-delivery-services",
+    "eds",
+    "generator",
+    "code-generator",
+    "scaffold",
+    "cli",
+    "adobe"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pushparajan/AEM-EDS-Claude-Codegen.git"
+  }
+}
