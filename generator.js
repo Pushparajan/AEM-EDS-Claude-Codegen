@@ -22,13 +22,52 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 const templates = {
   block: (name, options = {}) => {
     const className = name.toLowerCase().replace(/\s+/g, '-');
-    const jsContent = `export default function decorate(block) {
+
+    // Universal Editor instrumentation helper
+    const universalEditorHelper = options.universalEditor !== false ? `
+/**
+ * Moves Universal Editor instrumentation attributes from source to target element.
+ * This preserves in-context editing capabilities when restructuring the DOM.
+ * @param {Element} source - Original element with data-aue-* attributes
+ * @param {Element} target - New element to receive the attributes
+ */
+function moveInstrumentation(source, target) {
+  if (source === target) return;
+
+  // AEM Universal Editor instrumentation attributes
+  const instrumentationAttrs = [
+    'data-aue-resource',  // URN to the content resource
+    'data-aue-type',      // Type: component, container, text, richtext, reference
+    'data-aue-prop',      // Property name for the field
+    'data-aue-label',     // Custom label for the field
+    'data-aue-filter',    // Component filter (e.g., 'cf' for content fragments)
+    'data-aue-behavior',  // Behavior: 'component' for move/delete capabilities
+  ];
+
+  instrumentationAttrs.forEach((attr) => {
+    const value = source.getAttribute(attr);
+    if (value) {
+      target.setAttribute(attr, value);
+      source.removeAttribute(attr);
+    }
+  });
+}
+` : '';
+
+    const jsContent = `${universalEditorHelper}export default function decorate(block) {
   // TODO: Implement ${name} block decoration logic
   const rows = [...block.children];
 
   rows.forEach((row) => {
     const cells = [...row.children];
-    // Process cells and create block structure
+
+    // Process cells and create block structure${options.universalEditor !== false ? `
+    // IMPORTANT: When restructuring DOM, preserve Universal Editor instrumentation
+    // Example:
+    // const newElement = document.createElement('div');
+    // moveInstrumentation(cells[0], newElement);
+    // row.appendChild(newElement);` : ''}
+
     console.log('Processing row:', row);
   });
 
@@ -174,6 +213,69 @@ ${options.responsive ? `
 </body>
 </html>
 `;
+  },
+
+  /**
+   * Generates a component model definition for AEM Universal Editor.
+   * Component models define the fields shown in the Universal Editor properties panel.
+   * @param {string} blockName - Name of the block
+   * @param {Array} fields - Array of field definitions
+   * @returns {object} Component model definition
+   */
+  componentModel: (blockName, fields = []) => {
+    const blockId = blockName.toLowerCase().replace(/\s+/g, '-');
+
+    // Default fields if none provided
+    const defaultFields = fields.length > 0 ? fields : [
+      {
+        component: 'text',
+        name: 'title',
+        label: 'Title',
+        valueType: 'string'
+      },
+      {
+        component: 'richtext',
+        name: 'description',
+        label: 'Description',
+        valueType: 'string'
+      }
+    ];
+
+    return {
+      id: blockId,
+      fields: defaultFields,
+      filter: {
+        // Filter defines which blocks this model applies to
+        'name': blockId
+      }
+    };
+  },
+
+  /**
+   * Generates a complete component-models.json file for a project.
+   * This file is required for Universal Editor integration.
+   * @param {Array} models - Array of component model objects
+   * @returns {string} JSON string of component models
+   */
+  componentModelsFile: (models = []) => {
+    const defaultModels = models.length > 0 ? models : [
+      {
+        id: 'example',
+        fields: [
+          {
+            component: 'text',
+            name: 'title',
+            label: 'Title',
+            valueType: 'string'
+          }
+        ]
+      }
+    ];
+
+    return JSON.stringify({
+      ':type': 'sheet',
+      'data': defaultModels
+    }, null, 2);
   }
 };
 

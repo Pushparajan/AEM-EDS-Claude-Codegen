@@ -38,7 +38,7 @@ const server = new Server(
 const TOOLS = [
   {
     name: 'generate_block',
-    description: 'Generate a custom AEM Edge Delivery Services block with JavaScript and CSS. Blocks are the core building units of AEM EDS pages.',
+    description: 'Generate a custom AEM Edge Delivery Services block with JavaScript and CSS. Blocks are the core building units of AEM EDS pages. Supports AEM Universal Editor by default for in-context editing.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -59,6 +59,11 @@ const TOOLS = [
         responsive: {
           type: 'boolean',
           description: 'Add responsive design with media queries',
+          default: true,
+        },
+        universalEditor: {
+          type: 'boolean',
+          description: 'Include AEM Universal Editor instrumentation support (data-aue-* attributes handling)',
           default: true,
         },
       },
@@ -315,14 +320,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
  */
 
 function handleGenerateBlock(args) {
-  const { name, hasButtons = false, lazyLoad = false, responsive = true } = args;
-  const { js, css, className } = templates.block(name, { hasButtons, lazyLoad, responsive });
+  const { name, hasButtons = false, lazyLoad = false, responsive = true, universalEditor = true } = args;
+  const { js, css, className } = templates.block(name, { hasButtons, lazyLoad, responsive, universalEditor });
+
+  const message = universalEditor
+    ? `Generated block "${name}" (${className}) with AEM Universal Editor support\n\nFiles created:\n- ${className}.js (includes moveInstrumentation helper)\n- ${className}.css\n\nNote: Block includes data-aue-* attribute handling for in-context editing.`
+    : `Generated block "${name}" (${className})\n\nFiles created:\n- ${className}.js\n- ${className}.css`;
 
   return {
     content: [
       {
         type: 'text',
-        text: `Generated block "${name}" (${className})\n\nFiles created:\n- ${className}.js\n- ${className}.css`,
+        text: message,
       },
       {
         type: 'resource',
