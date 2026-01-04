@@ -564,14 +564,14 @@ async function handleUrlSubmit(e) {
 function showUrlResult(result) {
   const content = `
     <div class="result-info">
-      <h3>Site: ${result.siteName}</h3>
-      <p><strong>Source URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
-      <p><strong>Title:</strong> ${result.analysis.title || 'N/A'}</p>
+      <h3>Site: ${escapeHtml(result.siteName)}</h3>
+      <p><strong>Source URL:</strong> <a href="${escapeHtml(result.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.url)}</a></p>
+      <p><strong>Title:</strong> ${escapeHtml(result.analysis.title || 'N/A')}</p>
     </div>
 
     <div class="result-stats">
       <div class="stat-item">
-        <span class="stat-number">${result.analysis.componentsCount}</span>
+        <span class="stat-number">${result.analysis.components?.length || 0}</span>
         <span class="stat-label">Components Identified</span>
       </div>
       <div class="stat-item">
@@ -584,22 +584,22 @@ function showUrlResult(result) {
       </div>
     </div>
 
-    ${result.analysis.components.length > 0 ? `
+    ${result.analysis.components && result.analysis.components.length > 0 ? `
     <div class="result-section">
       <h4>Generated Components:</h4>
       <ul class="component-list">
         ${result.analysis.components.map(comp => 
-          `<li><strong>${comp.type}</strong> - ${comp.description}</li>`
+          `<li><strong>${escapeHtml(comp.type)}</strong> - ${escapeHtml(comp.description)}</li>`
         ).join('')}
       </ul>
     </div>
     ` : ''}
 
-    ${result.analysis.patterns.length > 0 ? `
+    ${result.analysis.patterns && result.analysis.patterns.length > 0 ? `
     <div class="result-section">
       <h4>Detected Patterns:</h4>
       <ul class="pattern-list">
-        ${result.analysis.patterns.map(pattern => `<li>${pattern}</li>`).join('')}
+        ${result.analysis.patterns.map(pattern => `<li>${escapeHtml(pattern)}</li>`).join('')}
       </ul>
     </div>
     ` : ''}
@@ -608,20 +608,20 @@ function showUrlResult(result) {
       <h4>Color Scheme:</h4>
       <div class="color-palette">
         <div class="color-item">
-          <div class="color-swatch" style="background-color: ${result.analysis.colors.primary}"></div>
-          <span>Primary: ${result.analysis.colors.primary}</span>
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.primary)}"></div>
+          <span>Primary: ${escapeHtml(result.analysis.colors.primary)}</span>
         </div>
         <div class="color-item">
-          <div class="color-swatch" style="background-color: ${result.analysis.colors.secondary}"></div>
-          <span>Secondary: ${result.analysis.colors.secondary}</span>
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.secondary)}"></div>
+          <span>Secondary: ${escapeHtml(result.analysis.colors.secondary)}</span>
         </div>
         <div class="color-item">
-          <div class="color-swatch" style="background-color: ${result.analysis.colors.background}"></div>
-          <span>Background: ${result.analysis.colors.background}</span>
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.background)}"></div>
+          <span>Background: ${escapeHtml(result.analysis.colors.background)}</span>
         </div>
         <div class="color-item">
-          <div class="color-swatch" style="background-color: ${result.analysis.colors.text}"></div>
-          <span>Text: ${result.analysis.colors.text}</span>
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.text)}"></div>
+          <span>Text: ${escapeHtml(result.analysis.colors.text)}</span>
         </div>
       </div>
     </div>

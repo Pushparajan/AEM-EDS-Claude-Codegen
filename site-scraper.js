@@ -244,7 +244,7 @@ function analyzeHTML(html, url) {
   if (html.match(/display:\s*flex/i) || html.match(/flexbox/i)) {
     analysis.patterns.push('flexbox-layout');
   }
-  if (html.match(/\@media/i)) {
+  if (html.match(/@media/i)) {
     analysis.patterns.push('responsive-design');
   }
   

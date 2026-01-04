@@ -285,12 +285,14 @@ async function loadBlockModule(blockName) {
   }
 
   try {
-    const module = await import(\`../blocks/\${blockName}/\${blockName}.js\`);
+    // Sanitize block name to prevent path traversal
+    const sanitizedName = blockName.replace(/[^a-z0-9-]/gi, '');
+    const module = await import(\`../blocks/\${sanitizedName}/\${sanitizedName}.js\`);
     const decorateFn = module.default;
     blockModules.set(blockName, decorateFn);
     return decorateFn;
   } catch (error) {
-    console.error(\`Failed to load block module: \${blockName}\`, error);
+    console.error('Failed to load block module:', sanitizedName, error);
     return null;
   }
 }
@@ -319,7 +321,7 @@ async function decorateBlock(block) {
       block.dataset.blockStatus = 'error';
     }
   } catch (error) {
-    console.error(\`Error decorating block: \${blockClass}\`, error);
+    console.error('Error decorating block:', blockClass, error);
     block.dataset.blockStatus = 'error';
   }
 }
