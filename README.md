@@ -15,6 +15,11 @@ A powerful command-line tool for generating boilerplate code for Adobe Experienc
   - Content Components (Title, Text, Image, Button, Teaser)
   - Container Components (Carousel, Tabs, Accordion)
   - Form Components (Form with validation)
+- 🎨 **Image-to-Component** - NEW! Generate components from UI screenshots/Figma designs
+  - Interactive guided analysis
+  - AI-assisted image analysis integration
+  - JSON template support for design systems
+  - Automatically generates HTML, CSS, and JavaScript from visual designs
 
 ## Installation
 
@@ -55,8 +60,9 @@ What would you like to generate?
 2. Custom Component
 3. Template
 4. Core Component (from library)
-5. Initialize new project
-6. Exit
+5. Component from Image/Screenshot 🎨
+6. Initialize new project
+7. Exit
 ```
 
 ### Generate a Block
@@ -205,6 +211,193 @@ All core components include:
 - ✅ Semantic HTML
 - ✅ BEM CSS naming conventions
 - ✅ Production-ready code
+
+### Generate Component from Image/Screenshot 🎨
+
+**NEW!** Transform UI screenshots or Figma designs into working code automatically.
+
+This powerful feature analyzes images of user interfaces and generates corresponding HTML, CSS, and JavaScript code. Perfect for converting designs into components quickly.
+
+**How it works:**
+
+```bash
+# Select option 5 from the menu
+=== Generate Component from Image ===
+
+Image path: /path/to/screenshot.png
+✓ Image found: screenshot.png (245.67 KB)
+
+Component name: product-card
+
+=== Image Analysis Mode ===
+
+Choose how to analyze the image:
+
+1. Interactive description (recommended)
+2. Auto-generate template (basic structure)
+3. Import analysis from JSON file
+
+Select mode (1-3): 1
+```
+
+#### Analysis Modes
+
+**1. Interactive Description (Recommended)**
+
+The generator guides you through describing the UI:
+
+```bash
+=== Interactive Image Analysis ===
+
+--- Layout ---
+Layout type (grid/flex/block) [flex]: grid
+Number of columns [auto-fit]: repeat(3, 1fr)
+Gap/spacing between elements [20px]: 24px
+Has header section? (y/n): y
+Has footer section? (y/n): n
+
+--- Colors ---
+Primary color [#0066cc]: #007bff
+Background color [#ffffff]: #f8f9fa
+Text color [#333333]: #212529
+
+--- Typography ---
+Font family [system-ui, sans-serif]: Inter, sans-serif
+Base font size [16px]: 16px
+Line height [1.6]: 1.5
+
+--- Components ---
+List the UI components you see:
+
+Component type: card
+  Brief description: Product card with image and details
+
+Component type: button
+  Brief description: Add to cart button
+
+Component type: (press Enter to finish)
+
+--- Interactions ---
+Has hover effects? (y/n): y
+Has click interactions? (y/n): y
+Has animations? (y/n): n
+```
+
+**2. Auto-generate Template**
+
+Quickly creates a basic structure without questions. Good for rapid prototyping.
+
+**3. Import from JSON**
+
+Use a pre-defined analysis file. Perfect for:
+- Reusing design patterns
+- Team collaboration
+- Design systems
+
+**Example JSON template:**
+
+```json
+{
+  "layout": {
+    "type": "grid",
+    "columns": "repeat(3, 1fr)",
+    "gap": "24px"
+  },
+  "colors": {
+    "primary": "#0066cc",
+    "background": "#ffffff",
+    "text": "#333333"
+  },
+  "typography": {
+    "fontFamily": "Inter, sans-serif",
+    "baseFontSize": "16px",
+    "lineHeight": "1.6"
+  },
+  "components": [
+    { "type": "card", "description": "Product card" },
+    { "type": "button", "description": "CTA button" }
+  ],
+  "interactions": [
+    { "type": "hover" },
+    { "type": "click" }
+  ]
+}
+```
+
+See `examples/analysis-template.json` for a complete template.
+
+#### Generated Output
+
+After analysis, the generator creates:
+
+```
+✓ Component "product-card" created from image!
+  Location: blocks/product-card/
+  Files:
+    - product-card.html (reference structure)
+    - product-card.js
+    - product-card.css
+    - analysis.json (for future reference)
+
+💡 Tip: Review and customize the generated code to match your exact design.
+```
+
+#### Best Practices for Image-to-Component
+
+1. **Use High-Quality Screenshots**
+   - Clear, high-resolution images work best
+   - Ensure text is readable
+   - Include the full component in frame
+
+2. **Prepare Before Analysis**
+   - Have color codes ready (use a color picker tool)
+   - Know your font families
+   - Identify layout patterns (grid vs flex)
+
+3. **Use JSON Templates for Design Systems**
+   - Create reusable analysis templates
+   - Share across team members
+   - Maintain consistency
+
+4. **Iterative Refinement**
+   - Start with auto-generate for speed
+   - Use interactive mode for precision
+   - Customize the generated code as needed
+
+5. **AI-Assisted Analysis**
+   - Use Claude or other AI vision models to analyze your image
+   - Export the analysis as JSON
+   - Import into the generator for instant code generation
+
+#### Advanced: Using AI Vision for Analysis
+
+For best results, use an AI vision model like Claude:
+
+1. Upload your screenshot to Claude
+2. Ask: "Analyze this UI component and provide a JSON analysis with layout, colors, typography, components, and interactions"
+3. Save the response as a JSON file
+4. Import it using option 3
+
+**Example prompt for Claude:**
+
+```
+Please analyze this UI screenshot and provide a detailed JSON analysis including:
+- Layout structure (grid/flex, columns, spacing)
+- Color palette (primary, secondary, background, text colors with hex codes)
+- Typography (font family, sizes, weights, line heights)
+- UI components present (buttons, cards, forms, etc.)
+- Interactive elements (hover effects, animations, click actions)
+- Responsive considerations
+
+Format as a JSON object matching this structure:
+{
+  "layout": { "type": "", "columns": "", "gap": "" },
+  "colors": { "primary": "", "background": "", "text": "" },
+  "typography": { "fontFamily": "", "baseFontSize": "", "lineHeight": "" },
+  "components": [{ "type": "", "description": "" }],
+  "interactions": [{ "type": "", "effect": "" }]
+}
+```
 
 ### Initialize a New Project
 
@@ -401,7 +594,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## TODO / Future Enhancements
 
 - [x] Core Component Library (30+ components based on Adobe AEM Core WCM Components)
+- [x] Image-to-Component generation (transform screenshots/Figma to code)
+- [ ] Direct AI vision integration (automatic image analysis without prompts)
 - [ ] Add remaining AEM Core components (List, Download, PDF Viewer, Embed, etc.)
+- [ ] Figma plugin for direct export to code
 - [ ] Add TypeScript support for generated components
 - [ ] Include unit test templates (Jest/Vitest)
 - [ ] Add ESLint configuration generation
@@ -412,6 +608,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [ ] Documentation generator for blocks
 - [ ] Component preview/storybook integration
 - [ ] Multi-language support in core components
+- [ ] Batch image processing (analyze multiple screenshots at once)
+- [ ] Design token extraction from images
 
 ## License
 

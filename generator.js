@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { coreComponents, componentCategories } = require('./core-components');
+const { analyzeImage, generateFromImageWithAI, analysisPrompts } = require('./image-analyzer');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -437,6 +438,223 @@ async function generateCoreComponent() {
   console.log(`  Description: ${selectedComponent.description}`);
 }
 
+async function generateFromImage() {
+  console.log('\n=== Generate Component from Image ===\n');
+  console.log('This feature analyzes UI screenshots/designs and generates component code.\n');
+
+  const imagePath = await question('Image path (PNG, JPG, WebP, etc.): ');
+
+  if (!imagePath) {
+    console.log('Image path is required');
+    return;
+  }
+
+  try {
+    // Validate image
+    const imageInfo = analyzeImage(imagePath);
+    console.log(`\n✓ Image found: ${path.basename(imagePath)} (${(imageInfo.size / 1024).toFixed(2)} KB)`);
+  } catch (error) {
+    console.log(`\n✗ Error: ${error.message}`);
+    return;
+  }
+
+  const componentName = await question('\nComponent name: ');
+  if (!componentName) {
+    console.log('Component name is required');
+    return;
+  }
+
+  console.log('\n=== Image Analysis Mode ===\n');
+  console.log('Choose how to analyze the image:\n');
+  console.log('1. Interactive description (recommended)');
+  console.log('2. Auto-generate template (basic structure)');
+  console.log('3. Import analysis from JSON file\n');
+
+  const mode = await question('Select mode (1-3): ');
+
+  let analysis = {};
+
+  switch (mode) {
+    case '1':
+      analysis = await interactiveAnalysis();
+      break;
+    case '2':
+      analysis = generateBasicAnalysis();
+      break;
+    case '3':
+      analysis = await importAnalysisFromFile();
+      break;
+    default:
+      console.log('Invalid mode selected');
+      return;
+  }
+
+  // Generate component from analysis
+  console.log('\nGenerating component...');
+
+  const component = generateFromImageWithAI(
+    { path: imagePath },
+    componentName,
+    analysis
+  );
+
+  // Save component files
+  const blocksDir = path.join(process.cwd(), 'blocks', component.className);
+
+  if (!fs.existsSync(blocksDir)) {
+    fs.mkdirSync(blocksDir, { recursive: true });
+  }
+
+  // Save HTML template (as a reference/documentation file)
+  fs.writeFileSync(path.join(blocksDir, `${component.className}.html`), component.html);
+  fs.writeFileSync(path.join(blocksDir, `${component.className}.js`), component.js);
+  fs.writeFileSync(path.join(blocksDir, `${component.className}.css`), component.css);
+
+  // Save analysis for reference
+  fs.writeFileSync(
+    path.join(blocksDir, 'analysis.json'),
+    JSON.stringify(analysis, null, 2)
+  );
+
+  console.log(`\n✓ Component "${componentName}" created from image!`);
+  console.log(`  Location: blocks/${component.className}/`);
+  console.log(`  Files:`);
+  console.log(`    - ${component.className}.html (reference structure)`);
+  console.log(`    - ${component.className}.js`);
+  console.log(`    - ${component.className}.css`);
+  console.log(`    - analysis.json (for future reference)`);
+  console.log(`\n💡 Tip: Review and customize the generated code to match your exact design.`);
+}
+
+async function interactiveAnalysis() {
+  console.log('\n=== Interactive Image Analysis ===\n');
+  console.log('Please describe what you see in the image:\n');
+
+  const analysis = {
+    layout: {},
+    colors: {},
+    typography: {},
+    components: [],
+    interactions: []
+  };
+
+  // Layout questions
+  console.log('--- Layout ---');
+  const layoutType = await question('Layout type (grid/flex/block) [flex]: ') || 'flex';
+  analysis.layout.type = layoutType;
+
+  if (layoutType === 'grid') {
+    const cols = await question('Number of columns [auto-fit]: ') || 'repeat(auto-fit, minmax(300px, 1fr))';
+    analysis.layout.columns = cols;
+  } else if (layoutType === 'flex') {
+    const direction = await question('Flex direction (row/column) [row]: ') || 'row';
+    analysis.layout.direction = direction;
+  }
+
+  const gap = await question('Gap/spacing between elements [20px]: ') || '20px';
+  analysis.layout.gap = gap;
+
+  const hasHeader = (await question('Has header section? (y/n): ')).toLowerCase() === 'y';
+  const hasFooter = (await question('Has footer section? (y/n): ')).toLowerCase() === 'y';
+  analysis.layout.hasHeader = hasHeader;
+  analysis.layout.hasFooter = hasFooter;
+
+  // Color questions
+  console.log('\n--- Colors ---');
+  const primaryColor = await question('Primary color [#0066cc]: ') || '#0066cc';
+  const bgColor = await question('Background color [#ffffff]: ') || '#ffffff';
+  const textColor = await question('Text color [#333333]: ') || '#333333';
+
+  analysis.colors = {
+    primary: primaryColor,
+    background: bgColor,
+    text: textColor
+  };
+
+  // Typography
+  console.log('\n--- Typography ---');
+  const fontFamily = await question('Font family [system-ui, sans-serif]: ') || 'system-ui, sans-serif';
+  const fontSize = await question('Base font size [16px]: ') || '16px';
+  const lineHeight = await question('Line height [1.6]: ') || '1.6';
+
+  analysis.typography = {
+    fontFamily,
+    baseFontSize: fontSize,
+    lineHeight
+  };
+
+  // Components
+  console.log('\n--- Components ---');
+  console.log('List the UI components you see (one per line, empty line to finish):');
+  console.log('Examples: button, card, navigation, image, heading, form, etc.\n');
+
+  let componentInput;
+  while (true) {
+    componentInput = await question('Component type (or press Enter to finish): ');
+    if (!componentInput) break;
+
+    const description = await question('  Brief description: ');
+    analysis.components.push({
+      type: componentInput.toLowerCase(),
+      description: description || componentInput
+    });
+  }
+
+  // Interactions
+  console.log('\n--- Interactions ---');
+  const hasHover = (await question('Has hover effects? (y/n): ')).toLowerCase() === 'y';
+  const hasClick = (await question('Has click interactions? (y/n): ')).toLowerCase() === 'y';
+  const hasAnimation = (await question('Has animations? (y/n): ')).toLowerCase() === 'y';
+
+  if (hasHover) analysis.interactions.push({ type: 'hover' });
+  if (hasClick) analysis.interactions.push({ type: 'click' });
+  if (hasAnimation) analysis.interactions.push({ type: 'animation' });
+
+  return analysis;
+}
+
+function generateBasicAnalysis() {
+  return {
+    layout: {
+      type: 'flex',
+      direction: 'column',
+      gap: '20px',
+      hasHeader: false,
+      hasFooter: false
+    },
+    colors: {
+      primary: '#0066cc',
+      background: '#ffffff',
+      text: '#333333'
+    },
+    typography: {
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      baseFontSize: '16px',
+      lineHeight: '1.6'
+    },
+    components: [
+      { type: 'container', description: 'Main container' },
+      { type: 'content', description: 'Content area' }
+    ],
+    interactions: []
+  };
+}
+
+async function importAnalysisFromFile() {
+  const jsonPath = await question('Path to analysis JSON file: ');
+
+  try {
+    const jsonContent = fs.readFileSync(jsonPath, 'utf8');
+    const analysis = JSON.parse(jsonContent);
+    console.log('✓ Analysis imported successfully');
+    return analysis;
+  } catch (error) {
+    console.log(`✗ Error importing analysis: ${error.message}`);
+    console.log('Using basic analysis instead...');
+    return generateBasicAnalysis();
+  }
+}
+
 // Main menu
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
@@ -448,10 +666,11 @@ async function main() {
   console.log('2. Custom Component');
   console.log('3. Template');
   console.log('4. Core Component (from library)');
-  console.log('5. Initialize new project');
-  console.log('6. Exit\n');
+  console.log('5. Component from Image/Screenshot 🎨');
+  console.log('6. Initialize new project');
+  console.log('7. Exit\n');
 
-  const choice = await question('Enter your choice (1-6): ');
+  const choice = await question('Enter your choice (1-7): ');
 
   switch (choice) {
     case '1':
@@ -467,9 +686,12 @@ async function main() {
       await generateCoreComponent();
       break;
     case '5':
-      await initProject();
+      await generateFromImage();
       break;
     case '6':
+      await initProject();
+      break;
+    case '7':
       console.log('Goodbye!');
       rl.close();
       return;
@@ -493,4 +715,13 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-module.exports = { templates, generateBlock, generateComponent, generateTemplate, initProject, generateCoreComponent, coreComponents };
+module.exports = {
+  templates,
+  generateBlock,
+  generateComponent,
+  generateTemplate,
+  initProject,
+  generateCoreComponent,
+  generateFromImage,
+  coreComponents
+};

@@ -1,0 +1,81 @@
+{
+  "layout": {
+    "type": "grid",
+    "columns": "repeat(3, 1fr)",
+    "gap": "24px",
+    "hasHeader": true,
+    "hasFooter": false
+  },
+  "colors": {
+    "primary": "#0066cc",
+    "secondary": "#6c757d",
+    "background": "#ffffff",
+    "text": "#333333",
+    "accent": "#ff6b6b"
+  },
+  "typography": {
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "baseFontSize": "16px",
+    "lineHeight": "1.6",
+    "headingWeight": "700",
+    "bodyWeight": "400"
+  },
+  "components": [
+    {
+      "type": "header",
+      "description": "Top navigation bar with logo and menu items"
+    },
+    {
+      "type": "hero",
+      "description": "Large hero section with title, subtitle, and CTA button"
+    },
+    {
+      "type": "card",
+      "description": "Card component with image, title, description, and link"
+    },
+    {
+      "type": "button",
+      "description": "Primary action button with rounded corners"
+    },
+    {
+      "type": "image",
+      "description": "Full-width responsive image with aspect ratio 16:9"
+    }
+  ],
+  "interactions": [
+    {
+      "type": "hover",
+      "target": "button",
+      "effect": "Scale up and change background color"
+    },
+    {
+      "type": "hover",
+      "target": "card",
+      "effect": "Shadow elevation and slight translate up"
+    },
+    {
+      "type": "click",
+      "target": "button",
+      "action": "Navigate or trigger action"
+    },
+    {
+      "type": "animation",
+      "target": "hero",
+      "effect": "Fade in on page load"
+    }
+  ],
+  "spacing": {
+    "containerPadding": "20px",
+    "sectionMargin": "60px",
+    "elementGap": "16px"
+  },
+  "responsive": {
+    "breakpoints": {
+      "mobile": "480px",
+      "tablet": "768px",
+      "desktop": "1024px"
+    },
+    "mobileLayout": "single-column",
+    "tabletLayout": "two-column"
+  }
+}
