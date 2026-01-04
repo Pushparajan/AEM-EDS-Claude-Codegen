@@ -10,6 +10,8 @@ const path = require('path');
 const readline = require('readline');
 const { coreComponents, componentCategories } = require('./core-components');
 const { analyzeImage, generateFromImageWithAI, analysisPrompts } = require('./image-analyzer');
+const { crawlSite } = require('./site-scraper');
+const { generateSite } = require('./site-generator');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -655,6 +657,71 @@ async function importAnalysisFromFile() {
   }
 }
 
+async function generateFromURL() {
+  console.log('\n=== Generate Site from URL ===\n');
+  console.log('This feature crawls a website and generates a complete AEM EDS site structure.\n');
+
+  const url = await question('Enter website URL (e.g., https://www.example.com): ');
+
+  if (!url) {
+    console.log('URL is required');
+    return;
+  }
+
+  console.log('\n🔍 Starting site analysis...\n');
+
+  try {
+    // Crawl and analyze the site
+    const crawlResult = await crawlSite(url, {
+      maxPages: 1,
+      timeout: 30000
+    });
+
+    if (!crawlResult.success) {
+      console.log(`\n✗ Failed to analyze site: ${crawlResult.error}`);
+      return;
+    }
+
+    console.log(`\n✓ Site analyzed successfully!`);
+    console.log(`  Domain: ${crawlResult.domainName}`);
+    console.log(`  Title: ${crawlResult.analysis.title || 'Unknown'}`);
+    console.log(`  Components found: ${crawlResult.analysis.components.length}`);
+
+    // Show what was found
+    if (crawlResult.analysis.components.length > 0) {
+      console.log('\nIdentified components:');
+      crawlResult.analysis.components.forEach(comp => {
+        console.log(`  - ${comp.type}: ${comp.description} (${comp.count} instance${comp.count > 1 ? 's' : ''})`);
+      });
+    }
+
+    console.log('\n📦 Generating site structure...\n');
+
+    // Generate the site
+    const result = generateSite(crawlResult);
+
+    console.log(`\n✅ Site generation complete!`);
+    console.log(`\n📁 Site created at: ${result.path}/`);
+    console.log('\nGenerated files:');
+    console.log(`  - ${result.components.length} component(s)`);
+    console.log(`  - ${result.templates.length} template(s)`);
+    console.log(`  - Styles and scripts`);
+    console.log(`  - README.md with documentation`);
+
+    console.log('\n📖 Next steps:');
+    console.log(`  1. cd ${result.siteName}`);
+    console.log(`  2. Review the README.md file`);
+    console.log(`  3. Customize the generated components`);
+    console.log(`  4. Add your content`);
+
+    console.log('\n💡 Tip: The generated code is a starting point. Review and customize it to match your exact requirements.');
+
+  } catch (error) {
+    console.log(`\n✗ Error: ${error.message}`);
+    console.error(error);
+  }
+}
+
 // Main menu
 async function main() {
   console.log('\n╔════════════════════════════════════════════╗');
@@ -668,9 +735,10 @@ async function main() {
   console.log('4. Core Component (from library)');
   console.log('5. Component from Image/Screenshot 🎨');
   console.log('6. Initialize new project');
-  console.log('7. Exit\n');
+  console.log('7. Generate site from URL 🌐');
+  console.log('8. Exit\n');
 
-  const choice = await question('Enter your choice (1-7): ');
+  const choice = await question('Enter your choice (1-8): ');
 
   switch (choice) {
     case '1':
@@ -692,6 +760,9 @@ async function main() {
       await initProject();
       break;
     case '7':
+      await generateFromURL();
+      break;
+    case '8':
       console.log('Goodbye!');
       rl.close();
       return;
@@ -723,5 +794,6 @@ module.exports = {
   initProject,
   generateCoreComponent,
   generateFromImage,
+  generateFromURL,
   coreComponents
 };

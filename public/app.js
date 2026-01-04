@@ -26,6 +26,7 @@ function initializeEventListeners() {
   document.getElementById('htmlTemplateForm')?.addEventListener('submit', handleTemplateSubmit);
   document.getElementById('imageAnalysisForm')?.addEventListener('submit', handleImageSubmit);
   document.getElementById('initForm')?.addEventListener('submit', handleProjectInitSubmit);
+  document.getElementById('urlForm')?.addEventListener('submit', handleUrlSubmit);
 
   // Image upload
   setupImageUpload();
@@ -49,7 +50,8 @@ function showGenerator(type) {
     'template': 'templateForm',
     'core-component': 'coreComponentForm',
     'image-component': 'imageComponentForm',
-    'project-init': 'projectInitForm'
+    'project-init': 'projectInitForm',
+    'url-site': 'urlSiteForm'
   };
 
   const formId = formMap[type];
@@ -527,6 +529,123 @@ function showLoading(show) {
   } else {
     overlay.classList.add('hidden');
   }
+}
+
+// URL Site Generator
+async function handleUrlSubmit(e) {
+  e.preventDefault();
+
+  const url = document.getElementById('siteUrl').value;
+
+  showLoading(true);
+
+  try {
+    const response = await fetch('/api/generate-from-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showUrlResult(result);
+    } else {
+      alert(`Failed to generate site: ${result.error}`);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to generate site. Please check the URL and try again.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function showUrlResult(result) {
+  const content = `
+    <div class="result-info">
+      <h3>Site: ${escapeHtml(result.siteName)}</h3>
+      <p><strong>Source URL:</strong> <a href="${escapeHtml(result.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.url)}</a></p>
+      <p><strong>Title:</strong> ${escapeHtml(result.analysis.title || 'N/A')}</p>
+    </div>
+
+    <div class="result-stats">
+      <div class="stat-item">
+        <span class="stat-number">${result.analysis.components?.length || 0}</span>
+        <span class="stat-label">Components Identified</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${result.generated.components}</span>
+        <span class="stat-label">Components Generated</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${result.generated.templates}</span>
+        <span class="stat-label">Templates Generated</span>
+      </div>
+    </div>
+
+    ${result.analysis.components && result.analysis.components.length > 0 ? `
+    <div class="result-section">
+      <h4>Generated Components:</h4>
+      <ul class="component-list">
+        ${result.analysis.components.map(comp => 
+          `<li><strong>${escapeHtml(comp.type)}</strong> - ${escapeHtml(comp.description)}</li>`
+        ).join('')}
+      </ul>
+    </div>
+    ` : ''}
+
+    ${result.analysis.patterns && result.analysis.patterns.length > 0 ? `
+    <div class="result-section">
+      <h4>Detected Patterns:</h4>
+      <ul class="pattern-list">
+        ${result.analysis.patterns.map(pattern => `<li>${escapeHtml(pattern)}</li>`).join('')}
+      </ul>
+    </div>
+    ` : ''}
+
+    <div class="result-section">
+      <h4>Color Scheme:</h4>
+      <div class="color-palette">
+        <div class="color-item">
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.primary)}"></div>
+          <span>Primary: ${escapeHtml(result.analysis.colors.primary)}</span>
+        </div>
+        <div class="color-item">
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.secondary)}"></div>
+          <span>Secondary: ${escapeHtml(result.analysis.colors.secondary)}</span>
+        </div>
+        <div class="color-item">
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.background)}"></div>
+          <span>Background: ${escapeHtml(result.analysis.colors.background)}</span>
+        </div>
+        <div class="color-item">
+          <div class="color-swatch" style="background-color: ${escapeHtml(result.analysis.colors.text)}"></div>
+          <span>Text: ${escapeHtml(result.analysis.colors.text)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <h4>Next Steps:</h4>
+      <ol class="next-steps">
+        <li>Download the generated files using the button below</li>
+        <li>Extract the ZIP file to your project directory</li>
+        <li>Review the README.md for detailed documentation</li>
+        <li>Customize components and templates as needed</li>
+        <li>Add actual content from the source site</li>
+      </ol>
+    </div>
+
+    <div class="info-message">
+      <strong>💡 Note:</strong> The generated code is a starting point based on automated analysis. 
+      Review and customize it to match your exact requirements.
+    </div>
+  `;
+
+  currentResult = result;
+  showResult({ success: true, message: result.message, files: result.files });
+  document.getElementById('resultContent').innerHTML = content;
 }
 
 // Utility Functions
